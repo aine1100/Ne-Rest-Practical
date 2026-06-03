@@ -119,15 +119,17 @@ For the frontend, create `view/.env.local` (optional):
 NEXT_PUBLIC_API_URL=http://localhost:3000/api
 ```
 
-### 3. Start Redis
+### 3. Start Redis (local dev)
 
-Using Docker:
+Using Docker for Redis only:
 
 ```bash
-docker compose up -d
+docker compose up -d redis
 ```
 
 Or run Redis locally on port **7001**.
+
+> For the **full Docker stack** (all services + PostgreSQL + frontend), see [Docker](#docker) below.
 
 ### 4. Database setup
 
@@ -263,6 +265,56 @@ Application logs are written to:
 - `logs/error.log` — errors only
 
 Set `LOG_TO_FILE=false` in `.env` to disable file logging.
+
+---
+
+## Docker
+
+Each microservice and the frontend has its own **Dockerfile**:
+
+| Service | Dockerfile |
+|---------|------------|
+| API Gateway | `gateway/Dockerfile` |
+| Auth | `services/auth/Dockerfile` |
+| Extinguisher | `services/extinguisher/Dockerfile` |
+| Inspection | `services/inspection/Dockerfile` |
+| Reporting | `services/reporting/Dockerfile` |
+| Notification | `services/notification/Dockerfile` |
+| Frontend | `view/Dockerfile` |
+
+### Run the full stack
+
+```bash
+# Copy env and set secrets (JWT, SMTP, DATABASE_PASSWORD)
+cp .env.example .env
+
+# Start PostgreSQL first and apply migrations from the host
+docker compose up -d postgres redis
+npm run db:migrate
+
+# Build and start all services
+docker compose up -d --build
+```
+
+| URL | Service |
+|-----|---------|
+| http://localhost:3010 | Frontend |
+| http://localhost:3000 | API Gateway |
+| http://localhost:3000/api-docs | Swagger |
+
+### Build a single service
+
+```bash
+docker build -f gateway/Dockerfile -t fems-gateway .
+docker build -f services/auth/Dockerfile -t fems-auth .
+docker build -f view/Dockerfile -t fems-view ./view
+```
+
+### Stop containers
+
+```bash
+docker compose down
+```
 
 ---
 

@@ -1,4 +1,4 @@
-const EXT_SERVICE = `http://localhost:${process.env.EXTINGUISHER_SERVICE_PORT || 3002}`;
+const EXT_SERVICE = `http://${process.env.EXTINGUISHER_SERVICE_HOST || 'localhost'}:${process.env.EXTINGUISHER_SERVICE_PORT || 3002}`;
 
 export async function updateExtinguisherStatus(extinguisherId, status, userId) {
   try {
@@ -21,7 +21,7 @@ export async function updateExtinguisherStatus(extinguisherId, status, userId) {
 }
 
 export async function notifyService(payload) {
-  const NOTIF_SERVICE = `http://localhost:${process.env.NOTIFICATION_SERVICE_PORT || 3005}`;
+  const NOTIF_SERVICE = `http://${process.env.NOTIFICATION_SERVICE_HOST || 'localhost'}:${process.env.NOTIFICATION_SERVICE_PORT || 3005}`;
   try {
     await fetch(`${NOTIF_SERVICE}/notifications/internal`, {
       method: 'POST',

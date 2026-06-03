@@ -1,6 +1,57 @@
 version: '3.8'
 
+x-backend-env: &backend-env
+  NODE_ENV: production
+  DATABASE_HOST: postgres
+  DATABASE_PORT: 5432
+  DATABASE_USER: postgres
+  DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+  DATABASE_NAME: fems
+  DATABASE_URL: postgresql://postgres:${DATABASE_PASSWORD:-postgres}@postgres:5432/fems
+  REDIS_HOST: redis
+  REDIS_PORT: 6379
+  JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change_me_in_production}
+  JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change_me_in_production}
+  JWT_ACCESS_EXPIRY: ${JWT_ACCESS_EXPIRY:-15m}
+  JWT_REFRESH_EXPIRY: ${JWT_REFRESH_EXPIRY:-7d}
+  OTP_EXPIRY_MINUTES: ${OTP_EXPIRY_MINUTES:-30}
+  OTP_MAX_RESENDS: ${OTP_MAX_RESENDS:-3}
+  SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+  SMTP_PORT: ${SMTP_PORT:-587}
+  SMTP_USER: ${SMTP_USER:-}
+  SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+  SMTP_FROM: ${SMTP_FROM:-FEMS System <noreply@fems.com>}
+  FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3010}
+  AUTH_SERVICE_HOST: auth
+  AUTH_SERVICE_PORT: 3001
+  EXTINGUISHER_SERVICE_HOST: extinguisher
+  EXTINGUISHER_SERVICE_PORT: 3002
+  INSPECTION_SERVICE_HOST: inspection
+  INSPECTION_SERVICE_PORT: 3003
+  REPORTING_SERVICE_HOST: reporting
+  REPORTING_SERVICE_PORT: 3004
+  NOTIFICATION_SERVICE_HOST: notification
+  NOTIFICATION_SERVICE_PORT: 3005
+
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: fems-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+      POSTGRES_DB: fems
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d fems"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   redis:
     image: redis:7-alpine
     container_name: fems-redis
@@ -10,6 +61,114 @@ services:
       - redis_data:/data
     command: redis-server --appendonly yes
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  auth:
+    build:
+      context: .
+      dockerfile: services/auth/Dockerfile
+    container_name: fems-auth
+    environment:
+      <<: *backend-env
+      AUTH_SERVICE_PORT: 3001
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  extinguisher:
+    build:
+      context: .
+      dockerfile: services/extinguisher/Dockerfile
+    container_name: fems-extinguisher
+    environment:
+      <<: *backend-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      notification:
+        condition: service_started
+    restart: unless-stopped
+
+  inspection:
+    build:
+      context: .
+      dockerfile: services/inspection/Dockerfile
+    container_name: fems-inspection
+    environment:
+      <<: *backend-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      extinguisher:
+        condition: service_started
+      notification:
+        condition: service_started
+    restart: unless-stopped
+
+  reporting:
+    build:
+      context: .
+      dockerfile: services/reporting/Dockerfile
+    container_name: fems-reporting
+    environment:
+      <<: *backend-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  notification:
+    build:
+      context: .
+      dockerfile: services/notification/Dockerfile
+    container_name: fems-notification
+    environment:
+      <<: *backend-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    container_name: fems-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      <<: *backend-env
+      GATEWAY_PORT: 3000
+    depends_on:
+      - auth
+      - extinguisher
+      - inspection
+      - reporting
+      - notification
+    restart: unless-stopped
+
+  view:
+    build:
+      context: ./view
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000/api}
+    container_name: fems-view
+    ports:
+      - "3010:3000"
+    depends_on:
+      - gateway
+    restart: unless-stopped
 
 volumes:
+  postgres_data:
   redis_data:

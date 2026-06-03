@@ -55,7 +55,7 @@ export function toDateString(date) {
 }
 
 export async function notifyService(payload) {
-  const NOTIF_SERVICE = `http://localhost:${process.env.NOTIFICATION_SERVICE_PORT || 3005}`;
+  const NOTIF_SERVICE = `http://${process.env.NOTIFICATION_SERVICE_HOST || 'localhost'}:${process.env.NOTIFICATION_SERVICE_PORT || 3005}`;
 
   try {
     await fetch(`${NOTIF_SERVICE}/notifications/internal`, {

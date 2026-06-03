@@ -5,25 +5,31 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.join(__dirname, '../../../.env') });
 
+function serviceUrl(hostEnv, portEnv, defaultPort) {
+  const host = process.env[hostEnv] || 'localhost';
+  const port = process.env[portEnv] || defaultPort;
+  return `http://${host}:${port}`;
+}
+
 export const services = {
   auth: {
-    target: `http://localhost:${process.env.AUTH_SERVICE_PORT || 3001}`,
+    target: serviceUrl('AUTH_SERVICE_HOST', 'AUTH_SERVICE_PORT', 3001),
     pathRewrite: {},
   },
   extinguisher: {
-    target: `http://localhost:${process.env.EXTINGUISHER_SERVICE_PORT || 3002}`,
+    target: serviceUrl('EXTINGUISHER_SERVICE_HOST', 'EXTINGUISHER_SERVICE_PORT', 3002),
     pathRewrite: {},
   },
   inspection: {
-    target: `http://localhost:${process.env.INSPECTION_SERVICE_PORT || 3003}`,
+    target: serviceUrl('INSPECTION_SERVICE_HOST', 'INSPECTION_SERVICE_PORT', 3003),
     pathRewrite: {},
   },
   reporting: {
-    target: `http://localhost:${process.env.REPORTING_SERVICE_PORT || 3004}`,
+    target: serviceUrl('REPORTING_SERVICE_HOST', 'REPORTING_SERVICE_PORT', 3004),
     pathRewrite: {},
   },
   notification: {
-    target: `http://localhost:${process.env.NOTIFICATION_SERVICE_PORT || 3005}`,
+    target: serviceUrl('NOTIFICATION_SERVICE_HOST', 'NOTIFICATION_SERVICE_PORT', 3005),
     pathRewrite: {},
   },
 };
