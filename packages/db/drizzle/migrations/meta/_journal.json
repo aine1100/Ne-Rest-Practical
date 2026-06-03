@@ -1,0 +1,26 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1780473624856,
+      "tag": "0000_dapper_surge",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1780473624857,
+      "tag": "0001_inspection_workflow",
+      "breakpoints": true
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1780473624858,
+      "tag": "0002_inspection_snapshot",
+      "breakpoints": true
+    }
+  ]
+}

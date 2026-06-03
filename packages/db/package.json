@@ -1,0 +1,25 @@
+{
+  "name": "@fems/db",
+  "version": "1.0.0",
+  "description": "Shared Drizzle ORM database package for FEMS",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./schema": "./src/schema/index.js"
+  },
+  "scripts": {
+    "db:generate": "drizzle-kit generate --config=drizzle.config.cjs",
+    "db:migrate": "drizzle-kit migrate --config=drizzle.config.cjs",
+    "db:push": "drizzle-kit push --config=drizzle.config.cjs",
+    "db:studio": "drizzle-kit studio --config=drizzle.config.cjs"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.39.3",
+    "postgres": "^3.4.5"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.30.4"
+  }
+}

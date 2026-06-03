@@ -1,0 +1,18 @@
+{
+  "name": "@fems/shared",
+  "version": "1.0.0",
+  "description": "Shared utilities for FEMS microservices",
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "ioredis": "^5.4.2",
+    "jsonwebtoken": "^9.0.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "winston": "^3.17.0"
+  }
+}

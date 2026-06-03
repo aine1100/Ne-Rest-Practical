@@ -1,0 +1,40 @@
+{
+  "name": "fems",
+  "version": "1.0.0",
+  "description": "Fire Extinguisher Management System - Microservices Backend",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/db",
+    "shared",
+    "gateway",
+    "services/auth",
+    "services/extinguisher",
+    "services/inspection",
+    "services/reporting",
+    "services/notification"
+  ],
+  "scripts": {
+    "dev": "concurrently --names \"GW,AUTH,EXT,INSP,RPT,NOTIF\" --prefix-colors \"cyan,green,yellow,magenta,blue,red\" \"npm run dev:gateway\" \"npm run dev:auth\" \"npm run dev:extinguisher\" \"npm run dev:inspection\" \"npm run dev:reporting\" \"npm run dev:notification\"",
+    "dev:gateway": "npm run dev --workspace=gateway",
+    "dev:auth": "npm run dev --workspace=services/auth",
+    "dev:extinguisher": "npm run dev --workspace=services/extinguisher",
+    "dev:inspection": "npm run dev --workspace=services/inspection",
+    "dev:reporting": "npm run dev --workspace=services/reporting",
+    "dev:notification": "npm run dev --workspace=services/notification",
+    "db:generate": "npm run db:generate --workspace=@fems/db",
+    "db:migrate": "npm run db:migrate --workspace=@fems/db",
+    "db:push": "npm run db:push --workspace=@fems/db",
+    "db:studio": "npm run db:studio --workspace=@fems/db",
+    "db:setup": "npm run db:migrate --workspace=@fems/db",
+    "db:export": "node scripts/db-export.js",
+    "db:export:copy": "node scripts/db-export.js --copy",
+    "db:import": "node scripts/db-import.js",
+    "seed": "node scripts/seed.js"
+  },
+  "devDependencies": {
+    "@fems/db": "*",
+    "concurrently": "^9.1.2",
+    "dotenv": "^16.4.7"
+  }
+}
